@@ -8,7 +8,7 @@ const server = http.createServer(app);
 
 // Allow socket.io connections from frontend (Vercel) or local development
 const allowedOrigins = [
-  "https://drawing-canvas-client.vercel.app", // Your deployed frontend
+  "https://drawing-canvas-client-git-main-girishgubbas-projects.vercel.app", // Your deployed frontend
   "http://localhost:3000",                   // Local development
 ];
 
