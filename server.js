@@ -5,10 +5,12 @@ const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
-// Allow socket.io connections from frontend origins.
-// During development we want to allow http://localhost:3000. For production,
-// set FRONTEND_ORIGIN to your deployed frontend origin (example: https://drawing-canvas-client.vercel.app).
-const allowedOrigins = [process.env.FRONTEND_ORIGIN || "http://localhost:3000", "https://drawing-canvas-client.vercel.app"];
+
+// Allow socket.io connections from frontend (Vercel) or local development
+const allowedOrigins = [
+  "https://drawing-canvas-client.vercel.app", // Your deployed frontend
+  "http://localhost:3000",                   // Local development
+];
 
 const io = new Server(server, {
   cors: {
@@ -18,14 +20,12 @@ const io = new Server(server, {
   },
 });
 
-// ✅ Serve frontend files from ../client
-//app.use(express.static(path.join(__dirname, "..", "client")));
+// Root route - backend-only, no frontend serving
+app.get("/", (req, res) => {
+  res.send("✅ Drawing Canvas Backend is running. Use Socket.io to connect!");
+});
 
-//app.get("/", (req, res) => {
- // res.sendFile(path.join(__dirname, "..", "client", "index.html"));
-//});
-
-// In-memory room store
+// In-memory room storage
 const rooms = {};
 
 io.on("connection", (socket) => {
@@ -44,7 +44,7 @@ io.on("connection", (socket) => {
       };
     }
 
-    // Assign usernames: user-1, user-2
+    // Assign usernames: user-1, user-2, ...
     rooms[roomId].userCount += 1;
     const userName = `user-${rooms[roomId].userCount}`;
 
@@ -63,7 +63,7 @@ io.on("connection", (socket) => {
       oplog: rooms[roomId].oplog,
     });
 
-    // Notify others
+    // Notify others in the room
     io.to(roomId).emit("users:update", rooms[roomId].users);
   });
 
@@ -120,5 +120,5 @@ io.on("connection", (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
